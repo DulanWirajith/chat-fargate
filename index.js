@@ -5,7 +5,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const { createAdapter } = require('@socket.io/redis-adapter');
 const { createClient } = require('redis');
-// const Presence = require('./lib/presence');
+const Presence = require('./lib/presence');
 
 const app = express();
 const server = http.createServer(app);
@@ -77,11 +77,10 @@ io.on('connection', function(socket) {
       return;
     }
 
-    // Presence.upsert(socket.id, {
-    //   username: socket.username
-    // });
+    Presence.upsert(socket.id, {
+      username: socket.username
+    });
   });
-  let users = [];
 
   // When the client emits 'add user', this listens and executes
   socket.on('add user', function(username) {
@@ -91,12 +90,12 @@ io.on('connection', function(socket) {
 
     // We store the username in the socket session for this client
     socket.username = username;
-    // Presence.upsert(socket.id, {
-    //   username: socket.username
-    // });
+    Presence.upsert(socket.id, {
+      username: socket.username
+    });
     addedUser = true;
 
-    // Presence.list(function(users) {
+    Presence.list(function(users) {
       socket.emit('login', {
         numUsers: users.length
       });
@@ -107,7 +106,7 @@ io.on('connection', function(socket) {
         username: socket.username,
         numUsers: users.length
       });
-    // });
+    });
   });
 
   // When the client emits 'typing', we broadcast it to others
@@ -129,16 +128,16 @@ io.on('connection', function(socket) {
   // When the user disconnects, perform this
   socket.on('disconnect', function() {
     if (addedUser) {
-      // Presence.remove(socket.id);
+      Presence.remove(socket.id);
 
-      // Presence.list(function(users) {
+      Presence.list(function(users) {
         console.log(`User disconnected: ${socket.username}`);
         // Echo globally (all clients) that a person has disconnected
         socket.broadcast.emit('user left', {
           username: socket.username,
           numUsers: users.length
         });
-      // });
+      });
     }
   });
 });
