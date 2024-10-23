@@ -18,6 +18,10 @@ const io = new Server(server, {
 // Create Redis clients for the adapter (one for pub, one for sub)
 const pubClient = createClient({
   url: "rediss://rtc-redis-test-w0htzp.serverless.apse1.cache.amazonaws.com:6379",
+  socket: {
+    tls: true, // Enable TLS
+    rejectUnauthorized: false, // Set to true for stricter security
+  },
 });
 const subClient = pubClient.duplicate();
 
