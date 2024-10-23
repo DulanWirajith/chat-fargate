@@ -3,15 +3,18 @@ var express = require('express');
 var app = express();
 var path = require('path');
 var server = require('http').createServer(app);
-var io = require('socket.io')(server);
-const redisAdapter = require('socket.io-redis');
-io.adapter(redisAdapter({ host: '3.1.218.79', port: 6379 }));
-
 var Presence = require('./lib/presence');
 
-// Lower the heartbeat timeout
-io.set('heartbeat timeout', 8000);
-io.set('heartbeat interval', 4000);
+const { Server } = require('socket.io');
+const redisAdapter = require('socket.io-redis');
+
+const io = new Server(server, {
+  pingTimeout: 8000,
+  pingInterval: 4000
+});
+
+// Use Redis adapter
+io.adapter(redisAdapter({ host: '3.1.218.79', port: 6379 }));
 
 var port = process.env.PORT || 3000;
 
@@ -91,7 +94,7 @@ io.on('connection', function(socket) {
       Presence.remove(socket.id);
 
       Presence.list(function(users) {
-        // echo globally (all clients) that a person has connected
+        // echo globally (all clients) that a person has disconnected
         socket.broadcast.emit('user left', {
           username: socket.username,
           numUsers: users.length
