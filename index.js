@@ -16,7 +16,7 @@ const io = new Server(server, {
 });
 
 // Create Redis clients for the adapter (one for pub, one for sub)
-const pubClient = createClient({ url: 'redis://3.1.218.79:6379' });
+const pubClient = createClient({ url: 'redis://rtc-redis-test-w0htzp.serverless.apse1.cache.amazonaws.com:6379' });
 const subClient = pubClient.duplicate();
 
 // Connect Redis clients with detailed logging
