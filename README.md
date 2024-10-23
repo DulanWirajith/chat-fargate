@@ -17,7 +17,6 @@ a port by supplying the `PORT` env variable.
 ### Server
 <img width="1800" alt="Screenshot 2024-10-23 at 9 33 03 AM" src="https://github.com/user-attachments/assets/c91096e8-eacf-48f7-961f-99d9a2b664b2">
 
-
 ### User 01
 <img width="1800" alt="Screenshot 2024-10-23 at 9 33 37 AM" src="https://github.com/user-attachments/assets/adc3b526-e352-4197-9149-a5ea206174e3">
 
