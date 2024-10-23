@@ -20,17 +20,25 @@ const pubClient = createClient({ url: 'redis://3.1.218.79:6379' });
 const subClient = pubClient.duplicate();
 
 // Connect Redis clients with detailed logging
+const startTime = Date.now();
+
 Promise.all([
-  pubClient.connect().then(() => {
-    console.log('Redis pubClient connected successfully');
-  }).catch(err => {
-    console.error('Redis pubClient connection error:', err);
-  }),
-  subClient.connect().then(() => {
-    console.log('Redis subClient connected successfully');
-  }).catch(err => {
-    console.error('Redis subClient connection error:', err);
-  })
+  pubClient.connect()
+    .then(() => {
+      const duration = Date.now() - startTime;
+      console.log(`Redis pubClient connected successfully in ${duration}ms`);
+    })
+    .catch(err => {
+      console.error('Redis pubClient connection error:', err);
+    }),
+  subClient.connect()
+    .then(() => {
+      const duration = Date.now() - startTime;
+      console.log(`Redis subClient connected successfully in ${duration}ms`);
+    })
+    .catch(err => {
+      console.error('Redis subClient connection error:', err);
+    })
 ])
   .then(() => {
     // Use the Redis adapter
