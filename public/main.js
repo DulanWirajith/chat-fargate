@@ -275,8 +275,9 @@ $(function() {
     }
   });
 
-  socket.on('reconnect_error', function () {
-    log('attempt to reconnect has failed');
-  });
+  socket.on('reconnect_error', function (error) {
+    log('Attempt to reconnect has failed:', error.message);
+    console.error('Reconnection error details:', error);
+});
 
 });
