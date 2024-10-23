@@ -19,15 +19,26 @@ const io = new Server(server, {
 const pubClient = createClient({ url: 'redis://3.1.218.79:6379' });
 const subClient = pubClient.duplicate();
 
-// Connect Redis clients
-Promise.all([pubClient.connect(), subClient.connect()])
+// Connect Redis clients with detailed logging
+Promise.all([
+  pubClient.connect().then(() => {
+    console.log('Redis pubClient connected successfully');
+  }).catch(err => {
+    console.error('Redis pubClient connection error:', err);
+  }),
+  subClient.connect().then(() => {
+    console.log('Redis subClient connected successfully');
+  }).catch(err => {
+    console.error('Redis subClient connection error:', err);
+  })
+])
   .then(() => {
     // Use the Redis adapter
     io.adapter(createAdapter(pubClient, subClient));
     console.log('Redis adapter connected');
   })
   .catch(err => {
-    console.error('Redis connection error:', err);
+    console.error('Error connecting Redis clients:', err);
   });
 
 const port = process.env.PORT || 3000;
@@ -41,9 +52,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 io.on('connection', function(socket) {
   let addedUser = false;
+  console.log(`User connected: ${socket.id}`);
 
   // When the client emits 'new message', this listens and executes
   socket.on('new message', function(data) {
+    console.log(`Message received from ${socket.username}: ${data}`);
     // We tell the client to execute 'new message'
     socket.broadcast.emit('new message', {
       username: socket.username,
@@ -53,7 +66,6 @@ io.on('connection', function(socket) {
 
   socket.conn.on('heartbeat', function() {
     if (!addedUser) {
-      // Don't start upserting until the user has added themselves.
       return;
     }
 
@@ -80,6 +92,7 @@ io.on('connection', function(socket) {
         numUsers: users.length
       });
 
+      console.log(`User joined: ${socket.username}, Total Users: ${users.length}`);
       // Echo globally (all clients) that a person has connected
       socket.broadcast.emit('user joined', {
         username: socket.username,
@@ -90,6 +103,7 @@ io.on('connection', function(socket) {
 
   // When the client emits 'typing', we broadcast it to others
   socket.on('typing', function() {
+    console.log(`User ${socket.username} is typing...`);
     socket.broadcast.emit('typing', {
       username: socket.username
     });
@@ -97,6 +111,7 @@ io.on('connection', function(socket) {
 
   // When the client emits 'stop typing', we broadcast it to others
   socket.on('stop typing', function() {
+    console.log(`User ${socket.username} stopped typing.`);
     socket.broadcast.emit('stop typing', {
       username: socket.username
     });
@@ -108,6 +123,7 @@ io.on('connection', function(socket) {
       Presence.remove(socket.id);
 
       Presence.list(function(users) {
+        console.log(`User disconnected: ${socket.username}`);
         // Echo globally (all clients) that a person has disconnected
         socket.broadcast.emit('user left', {
           username: socket.username,
